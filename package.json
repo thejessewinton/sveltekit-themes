@@ -10,6 +10,7 @@
     "package": "svelte-package",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
+    "publish": "pnpm build && changeset version && changeset publish",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
