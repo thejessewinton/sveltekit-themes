@@ -1,7 +1,7 @@
 {
   "name": "sveltekit-themes",
   "private": false,
-  "version": "0.2.1",
+  "version": "1.0.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -10,7 +10,7 @@
     "package": "svelte-package",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
-    "publish": "pnpm build && changeset version && changeset publish",
+    "publish": "pnpm package && changeset version && changeset publish",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },

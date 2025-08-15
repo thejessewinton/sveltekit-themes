@@ -1,5 +1,7 @@
-export declare const useTheme: (storageKey?: string, defaultTheme?: string) => {
+declare const THEME_CONTEXT_KEY: unique symbol;
+export declare const useTheme: () => {
     readonly current: string | undefined;
     readonly resolved: string | undefined;
-    set: (value: string | ((current?: string) => string)) => void;
+    set: (theme: string) => void;
 };
+export { THEME_CONTEXT_KEY };
