@@ -1,5 +1,11 @@
 # sveltekit-themes
 
+## 1.0.1
+
+### Patch Changes
+
+- Add README
+
 ## 1.0.0
 
 ### Major Changes
