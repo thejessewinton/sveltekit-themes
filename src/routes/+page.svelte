@@ -13,11 +13,14 @@
     <select
       onchange={(e) => theme.set(e.currentTarget.value)}
       class="p-2 rounded"
-      bind:value={theme.current}
+      value={theme.current}
     >
       <option value="light"> Light Theme </option>
       <option value="dark"> Dark Theme </option>
       <option value="system"> System Theme </option>
     </select>
+
+    <p>Current theme: {theme.current}</p>
+    <p>Resolved theme: {theme.resolved}</p>
   </div>
 </div>

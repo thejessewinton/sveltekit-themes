@@ -1,64 +1,24 @@
-import { MediaQuery } from 'svelte/reactivity';
-import type { ThemeProviderProps } from './types';
+import { getContext } from 'svelte';
+import type { ThemeContextProps } from './types';
 
-const isServer = typeof window === 'undefined';
-const MEDIA = '(prefers-color-scheme: dark)';
-const isDarkPreferred = new MediaQuery(MEDIA);
+const THEME_CONTEXT_KEY = Symbol('theme');
 
-export const useTheme = (storageKey: string, defaultTheme?: string) => {
-  const getSystemTheme = $derived(() =>
-    isDarkPreferred.current ? 'dark' : 'light'
-  );
+export const useTheme = () => {
+  const context = getContext<ThemeContextProps>(THEME_CONTEXT_KEY);
 
-  const getTheme = (key: string, fallback?: string) => {
-    if (isServer) return undefined;
-    try {
-      return localStorage.getItem(key) || fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  let theme = $state(getTheme(storageKey, defaultTheme));
-  let resolvedTheme = $derived(theme === 'system' ? getSystemTheme() : theme);
-
-  const saveToLS = (key: string, value: string) => {
-    if (isServer) return;
-    try {
-      localStorage.setItem(key, value);
-    } catch {}
-  };
-
-  const update = (value: string | ((current?: string) => string)) => {
-    if (typeof value === 'function') {
-      const newTheme = value(theme);
-      theme = newTheme;
-      saveToLS(storageKey, newTheme);
-    } else {
-      theme = value;
-      saveToLS(storageKey, value);
-    }
-  };
-
-  $effect(() => {
-    if (isServer) return;
-
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key !== storageKey) return;
-      theme = e.newValue || defaultTheme;
-    };
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  });
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
 
   return {
     get current() {
-      return theme;
+      return context.theme;
     },
     get resolved() {
-      return resolvedTheme;
+      return context.resolvedTheme;
     },
-    set: update,
+    set: context.setTheme,
   };
 };
+
+export { THEME_CONTEXT_KEY };

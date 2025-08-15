@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { tick, setContext } from 'svelte';
   import { MediaQuery } from 'svelte/reactivity';
   import ThemeScript from './script.svelte';
   import type { Attribute, ThemeProviderProps } from './types';
-  import { useTheme } from './state.svelte';
+  import { THEME_CONTEXT_KEY } from './state.svelte';
 
   const MEDIA = '(prefers-color-scheme: dark)';
   const isDarkPreferred = new MediaQuery(MEDIA);
   const isServer = typeof window === 'undefined';
 
   const getTheme = (key: string, fallback?: string) => {
-    if (isServer) return undefined;
+    if (isServer) return fallback;
     try {
       return localStorage.getItem(key) || fallback;
     } catch {
@@ -42,11 +42,10 @@
   const colorSchemes = ['light', 'dark'];
 
   const saveToLS = (storageKey: string, value: string) => {
+    if (isServer) return;
     try {
       localStorage.setItem(storageKey, value);
-    } catch (e) {
-      // Unsupported
-    }
+    } catch {}
   };
 
   const {
@@ -64,14 +63,37 @@
     scriptProps,
   }: ThemeProviderProps = $props();
 
-  let theme = useTheme(getTheme(storageKey, defaultTheme) || defaultTheme);
+  let theme = $state(getTheme(storageKey, defaultTheme) || defaultTheme);
+  let resolvedTheme = $derived(theme === 'system' ? getSystemTheme() : theme);
+
   const attrs = !value ? themes : Object.values(value);
 
-  const applyTheme = (theme?: string) => {
-    let resolved = theme;
-    if (!resolved) return;
+  const setTheme = (newValue: string | ((current: string) => string)) => {
+    if (typeof newValue === 'function') {
+      const result = newValue(theme);
+      theme = result;
+      saveToLS(storageKey, result);
+    } else {
+      theme = newValue;
+      saveToLS(storageKey, newValue);
+    }
+  };
 
-    if (theme === 'system' && enableSystem) {
+  setContext(THEME_CONTEXT_KEY, {
+    get theme() {
+      return theme;
+    },
+    get resolvedTheme() {
+      return resolvedTheme;
+    },
+    setTheme,
+  });
+
+  const applyTheme = (themeValue?: string) => {
+    if (isServer || !themeValue) return;
+
+    let resolved = themeValue;
+    if (themeValue === 'system' && enableSystem) {
       resolved = getSystemTheme();
     }
 
@@ -108,31 +130,30 @@
   };
 
   $effect(() => {
-    if (theme.current === 'system' && enableSystem && !forcedTheme) {
+    applyTheme(forcedTheme ?? theme);
+  });
+
+  $effect(() => {
+    if (theme === 'system' && enableSystem && !forcedTheme) {
       applyTheme('system');
     }
   });
 
   $effect(() => {
+    if (isServer) return;
+
     const handleStorage = (e: StorageEvent) => {
-      if (e.key !== storageKey) {
-        return;
-      }
+      if (e.key !== storageKey) return;
 
       if (!e.newValue) {
-        theme.set(defaultTheme);
+        theme = defaultTheme;
       } else {
-        theme.set(e.newValue);
+        theme = e.newValue;
       }
     };
 
     window.addEventListener('storage', handleStorage);
-
     return () => window.removeEventListener('storage', handleStorage);
-  });
-
-  $effect(() => {
-    applyTheme(forcedTheme ?? theme.current);
   });
 </script>
 
