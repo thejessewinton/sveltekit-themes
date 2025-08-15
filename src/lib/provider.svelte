@@ -21,7 +21,11 @@
   const disableAnimation = (nonce?: string) => {
     const css = document.createElement('style');
     if (nonce) css.setAttribute('nonce', nonce);
-    css.textContent = `*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}`;
+    css.appendChild(
+      document.createTextNode(
+        `*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}`
+      )
+    );
     document.head.appendChild(css);
 
     return async () => {

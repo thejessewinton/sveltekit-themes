@@ -2,8 +2,6 @@
   import { useTheme } from '$lib';
 
   const theme = useTheme();
-
-  $inspect('theme', theme.current);
 </script>
 
 <div
@@ -15,6 +13,7 @@
     <select
       onchange={(e) => theme.set(e.currentTarget.value)}
       class="p-2 rounded"
+      bind:value={theme.current}
     >
       <option value="light"> Light Theme </option>
       <option value="dark"> Dark Theme </option>
