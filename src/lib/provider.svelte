@@ -3,7 +3,7 @@
   import { MediaQuery } from 'svelte/reactivity';
   import ThemeScript from './script.svelte';
   import type { Attribute, ThemeProviderProps } from './types';
-  import { useTheme } from './state.svelte.js';
+  import { useTheme } from './state.svelte';
 
   const MEDIA = '(prefers-color-scheme: dark)';
   const isDarkPreferred = new MediaQuery(MEDIA);
@@ -35,9 +35,19 @@
     };
   };
 
-  const getSystemTheme = () => (isDarkPreferred.current ? 'dark' : 'light');
+  const getSystemTheme = $derived(() =>
+    isDarkPreferred.current ? 'dark' : 'light'
+  );
 
   const colorSchemes = ['light', 'dark'];
+
+  const saveToLS = (storageKey: string, value: string) => {
+    try {
+      localStorage.setItem(storageKey, value);
+    } catch (e) {
+      // Unsupported
+    }
+  };
 
   const {
     forcedTheme,
@@ -54,22 +64,19 @@
     scriptProps,
   }: ThemeProviderProps = $props();
 
-  //let theme = useTheme(getTheme(storageKey, defaultTheme));
-  let theme = useTheme(storageKey, getTheme(storageKey, defaultTheme));
+  let theme = useTheme(getTheme(storageKey, defaultTheme) || defaultTheme);
   const attrs = !value ? themes : Object.values(value);
 
-  const applyTheme = (t?: string) => {
-    let resolved = t;
+  const applyTheme = (theme?: string) => {
+    let resolved = theme;
     if (!resolved) return;
 
-    if (t === 'system' && enableSystem) {
+    if (theme === 'system' && enableSystem) {
       resolved = getSystemTheme();
     }
 
     const name = value ? value[resolved] : resolved;
-    const disableAnim = disableTransitionOnChange
-      ? disableAnimation(nonce)
-      : null;
+    const enable = disableTransitionOnChange ? disableAnimation(nonce) : null;
     const d = document.documentElement;
 
     const handleAttribute = (attr: Attribute) => {
@@ -93,16 +100,39 @@
         ? defaultTheme
         : null;
       const colorScheme = colorSchemes.includes(resolved) ? resolved : fallback;
-      d.style.colorScheme = colorScheme ?? '';
+      // @ts-ignore
+      d.style.colorScheme = colorScheme;
     }
 
-    disableAnim?.();
+    enable?.();
   };
 
   $effect(() => {
     if (theme.current === 'system' && enableSystem && !forcedTheme) {
       applyTheme('system');
     }
+  });
+
+  $effect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key !== storageKey) {
+        return;
+      }
+
+      if (!e.newValue) {
+        theme.set(defaultTheme);
+      } else {
+        theme.set(e.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    return () => window.removeEventListener('storage', handleStorage);
+  });
+
+  $effect(() => {
+    applyTheme(forcedTheme ?? theme.current);
   });
 </script>
 

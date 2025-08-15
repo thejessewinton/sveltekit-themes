@@ -1,26 +1,29 @@
 import { MediaQuery } from 'svelte/reactivity';
+import type { ThemeProviderProps } from './types';
 
-const isBrowser = typeof window !== 'undefined';
+const isServer = typeof window === 'undefined';
 const MEDIA = '(prefers-color-scheme: dark)';
 const isDarkPreferred = new MediaQuery(MEDIA);
 
-export const useTheme = (storageKey = 'theme', defaultTheme?: string) => {
-  const getSystemTheme = () => (isDarkPreferred.current ? 'dark' : 'light');
+export const useTheme = (storageKey: string, defaultTheme?: string) => {
+  const getSystemTheme = $derived(() =>
+    isDarkPreferred.current ? 'dark' : 'light'
+  );
 
-  const getInitialTheme = () => {
-    if (!isBrowser) return defaultTheme;
+  const getTheme = (key: string, fallback?: string) => {
+    if (isServer) return undefined;
     try {
-      return localStorage.getItem(storageKey) || defaultTheme;
+      return localStorage.getItem(key) || fallback;
     } catch {
-      return defaultTheme;
+      return fallback;
     }
   };
 
-  let theme = $state<string | undefined>(getInitialTheme());
+  let theme = $state(getTheme(storageKey, defaultTheme));
   let resolvedTheme = $derived(theme === 'system' ? getSystemTheme() : theme);
 
   const saveToLS = (key: string, value: string) => {
-    if (!isBrowser) return;
+    if (isServer) return;
     try {
       localStorage.setItem(key, value);
     } catch {}
@@ -38,7 +41,7 @@ export const useTheme = (storageKey = 'theme', defaultTheme?: string) => {
   };
 
   $effect(() => {
-    if (!isBrowser) return;
+    if (isServer) return;
 
     const handleStorage = (e: StorageEvent) => {
       if (e.key !== storageKey) return;
