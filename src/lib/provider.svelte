@@ -7,10 +7,10 @@
 
   const MEDIA = '(prefers-color-scheme: dark)';
   const isDarkPreferred = new MediaQuery(MEDIA);
-  const isBrowser = typeof window !== 'undefined';
+  const isServer = typeof window === 'undefined';
 
   const getTheme = (key: string, fallback?: string) => {
-    if (!isBrowser) return undefined;
+    if (isServer) return undefined;
     try {
       return localStorage.getItem(key) || fallback;
     } catch {
