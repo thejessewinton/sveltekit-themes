@@ -28,10 +28,12 @@
     );
     document.head.appendChild(css);
 
-    return async () => {
-      window.getComputedStyle(document.body);
-      await tick();
-      document.head.removeChild(css);
+    return () => {
+      (() => window.getComputedStyle(document.body))();
+
+      setTimeout(() => {
+        document.head.removeChild(css);
+      }, 1);
     };
   };
 
@@ -89,11 +91,11 @@
     setTheme,
   });
 
-  const applyTheme = (themeValue?: string) => {
-    if (isServer || !themeValue) return;
+  const applyTheme = (theme?: string) => {
+    let resolved = theme;
+    if (!resolved) return;
 
-    let resolved = themeValue;
-    if (themeValue === 'system' && enableSystem) {
+    if (theme === 'system' && enableSystem) {
       resolved = getSystemTheme();
     }
 
@@ -140,8 +142,6 @@
   });
 
   $effect(() => {
-    if (isServer) return;
-
     const handleStorage = (e: StorageEvent) => {
       if (e.key !== storageKey) return;
 

@@ -5,7 +5,7 @@
 </script>
 
 <div
-  class="min-h-screen grid place-items-center bg-white dark:bg-black text-black dark:text-white"
+  class="min-h-screen grid place-items-center bg-white dark:bg-black transition-all duration-1000 text-black dark:text-white"
 >
   <div class="grid gap-4 text-center">
     <h1 class="text-2xl md:text-3xl">SvelteKit Themes</h1>

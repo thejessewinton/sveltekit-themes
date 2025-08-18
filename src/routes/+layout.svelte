@@ -5,6 +5,6 @@
   let { children } = $props();
 </script>
 
-<ThemeProvider attribute="class" storageKey="the-theme">
+<ThemeProvider attribute="class" disableTransitionOnChange>
   {@render children?.()}
 </ThemeProvider>
