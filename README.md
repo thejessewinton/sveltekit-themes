@@ -52,29 +52,6 @@ That's it, your SvelteKit app fully supports dark mode, including System prefere
 }
 ```
 
-## useTheme
-
-In your components, you can use the `useTheme` hook to access the current theme and methods to change it.
-
-> Note: `sveltekit-themes` is built with runes, requiring that you are running v5.0.0 or later.
-
-```svelte
-<script lang="ts">
-  import { useTheme } from '$lib';
-
-  const theme = useTheme();
-</script>
-
-<select
-    onchange={(e) => theme.set(e.currentTarget.value)}
-    value={theme.current}
->
-    <option value="light"> Light Theme </option>
-    <option value="dark"> Dark Theme </option>
-    <option value="system"> System Theme </option>
-</select>
-```
-
 ## API
 
 Let's dig into the details.
@@ -107,9 +84,16 @@ useTheme takes no parameters, but returns all the methods and properties you nee
 
   const theme = useTheme();
 </script>
-```
 
-`const theme = useTheme();` will have the following properties and methods:
+<select
+    onchange={(e) => theme.set(e.currentTarget.value)}
+    value={theme.current}
+>
+    <option value="light"> Light Theme </option>
+    <option value="dark"> Dark Theme </option>
+    <option value="system"> System Theme </option>
+</select>
+```
 
 - `current`: Active theme name.
 - `set(name)`: Function to update the theme. Pass the new theme value or use a callback to set the new theme based on the current theme.
