@@ -1,5 +1,11 @@
 # sveltekit-themes
 
+## 1.1.0
+
+### Minor Changes
+
+- update disableTransition logic
+
 ## 1.0.1
 
 ### Patch Changes
