@@ -74,12 +74,6 @@
           const colorScheme = (theme === 'dark' || theme === 'light') ? theme : null;
           if (colorScheme) d.style.colorScheme = colorScheme;
         }
-        const css = document.createElement('style');
-        css.appendChild(document.createTextNode('*,*::before,*::after{transition:none!important}'));
-        document.head.appendChild(css);
-        setTimeout(function() {
-          document.head.removeChild(css);
-        }, 1);
 
       } catch (e) {}
     })();

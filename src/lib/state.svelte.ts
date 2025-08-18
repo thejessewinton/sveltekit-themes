@@ -17,6 +17,9 @@ export const useTheme = () => {
     get resolved() {
       return context.resolvedTheme;
     },
+    themes: context.themes,
+    forcedTheme: context.forcedTheme,
+    systemTheme: context.systemTheme,
     set: context.setTheme,
   };
 };

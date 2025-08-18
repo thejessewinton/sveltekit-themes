@@ -1,8 +1,12 @@
 <script lang="ts">
-  import { tick, setContext } from 'svelte';
+  import { setContext } from 'svelte';
   import { MediaQuery } from 'svelte/reactivity';
   import ThemeScript from './script.svelte';
-  import type { Attribute, ThemeProviderProps } from './types';
+  import type {
+    Attribute,
+    ThemeContextProps,
+    ThemeProviderProps,
+  } from './types';
   import { THEME_CONTEXT_KEY } from './state.svelte';
 
   const MEDIA = '(prefers-color-scheme: dark)';
@@ -30,9 +34,9 @@
 
     return () => {
       (() => window.getComputedStyle(document.body))();
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         document.head.removeChild(css);
-      }, 1);
+      });
     };
   };
 
@@ -80,7 +84,7 @@
     }
   };
 
-  setContext(THEME_CONTEXT_KEY, {
+  setContext<ThemeContextProps>(THEME_CONTEXT_KEY, {
     get theme() {
       return theme;
     },
@@ -88,6 +92,14 @@
       return resolvedTheme;
     },
     setTheme,
+    forcedTheme,
+    themes,
+    get systemTheme() {
+      return (enableSystem ? resolvedTheme : undefined) as
+        | 'light'
+        | 'dark'
+        | undefined;
+    },
   });
 
   const applyTheme = (theme?: string) => {
