@@ -30,7 +30,6 @@
 
     return () => {
       (() => window.getComputedStyle(document.body))();
-
       setTimeout(() => {
         document.head.removeChild(css);
       }, 1);
